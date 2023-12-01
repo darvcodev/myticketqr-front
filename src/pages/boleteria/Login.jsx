@@ -2,7 +2,6 @@ import Swal from "sweetalert2";
 import { authAPI } from "../../api/api";
 
 export const Login = () => {
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const username = e.target.username.value;
@@ -13,7 +12,6 @@ export const Login = () => {
       const user = await authAPI.login(credentials);
       localStorage.setItem("userId", user.userId);
       window.location.reload();
-      console.log(user);
     } catch (error) {
       Swal.fire({
         icon: "error",

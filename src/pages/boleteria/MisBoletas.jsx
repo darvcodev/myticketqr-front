@@ -1,24 +1,89 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ticketsAPI } from "../../api/api";
-import { v4 as uuidv4 } from "uuid";
+
+const EstadoBoleta = ({ estado }) => {
+  const estados = {
+    Pagada: "text-green-500 font-bold",
+    Abonada: "text-amber-500 font-bold",
+    "No pagada": "text-red-500 font-bold",
+    Anulada: "text-gray-500 font-bold",
+    Error: "text-red-500 font-bold",
+  };
+
+  const estadoClase = estados[estado] || estados["Error"];
+
+  return <span className={estadoClase}>{estado}</span>;
+};
+
+const BoletaItem = ({ boleta, onEditClick, onViewClick }) => {
+  return (
+    <div
+      className="bg-gray-900 rounded-lg border-2 border-gray-700"
+      key={boleta._id}
+    >
+      <div className="grid grid-cols-2 gap-4 p-4">
+        <InfoItem label="N° Boleta" value={boleta.nboleta} />
+        <InfoItem label="Comprador" value={boleta.comprador} />
+        <InfoItem label="Celular" value={boleta.celular} />
+        <InfoItem
+          label="Estado"
+          value={<EstadoBoleta estado={boleta.estado} />}
+        />
+        <InfoItem
+          label="Precio"
+          value={`$ ${boleta.precio
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
+        />
+        <InfoItem label="Validada" value={boleta.validada ? "✅" : "❌"} />
+        <hr className="col-span-2 border-gray-700" />
+        <button
+          onClick={onEditClick}
+          className={`col-span-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg ${
+            boleta.validada ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          }`}
+          disabled={boleta.validada}
+        >
+          Editar
+        </button>
+        <button
+          onClick={onViewClick}
+          className="col-span-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+        >
+          Ver boleta
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const InfoItem = ({ label, value }) => {
+  return (
+    <>
+      <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
+        {label}:
+      </div>
+      <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
+        {value}
+      </div>
+    </>
+  );
+};
 
 export const MisBoletas = () => {
-  const [list, setList] = useState([]);
-
+  const [boletas, setBoletas] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tickets = await ticketsAPI.getAll();
-
-        const ticketsWithIds = tickets.map((item) => ({
-          ...item,
-          id: uuidv4(),
-        }));
-
-        setList(ticketsWithIds);
+        const allTickets = await ticketsAPI.getAll();
+        const userId = localStorage.getItem("userId");
+        const userTickets = allTickets.filter(
+          (ticket) => ticket.userId === userId
+        );
+        setBoletas(userTickets);
       } catch (error) {
         console.log(error);
       }
@@ -32,86 +97,21 @@ export const MisBoletas = () => {
         Mis Boletas
       </h1>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {list.map((item) => (
-          <div
-            className="bg-gray-900 rounded-lg border-2 border-gray-700"
-            key={item.id}
-          >
-            <div className="grid grid-cols-2 gap-4 p-4">
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                N° Boleta:
-              </div>
-              <div className="font-normal col-span-1 text-amber-500 text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.nboleta}
-              </div>
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                Comprador:
-              </div>
-              <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.comprador}
-              </div>
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                Celular:
-              </div>
-              <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.celular}
-              </div>
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                Estado:
-              </div>
-              <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.estado === "Pagada" ? (
-                  <span className="text-green-500 font-bold">Pagada</span>
-                ) : item.estado === "Abonada" ? (
-                  <span className="text-amber-500 font-bold">Abonada</span>
-                ) : item.estado === "No pagada" ? (
-                  <span className="text-red-500 font-bold">No pagada</span>
-                ) : item.estado === "Anulada" ? (
-                  <span className="text-gray-500 font-bold">Anulada</span>
-                ) : (
-                  <span className="text-red-500 font-bold">Error</span>
-                )}
-              </div>
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                Precio:
-              </div>
-              <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-              </div>
-              <div className="col-span-1 text-white font-bold text-xl border-r border-b border-gray-700 pb-2">
-                Validada:
-              </div>
-              <div className="font-normal col-span-1 text-white text-xl border-l border-b border-gray-700 pb-2 pl-2">
-                {item.validada ? "✅" : "❌"}
-              </div>
-              <hr className="col-span-2 border-gray-700" />
-              <button
-                onClick={() =>
-                  navigate(`/boleta-update/${item.userId.timestamp}`, {
-                    state: item,
-                  })
-                }
-                className={`col-span-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg ${
-                  item.validada
-                    ? "cursor-not-allowed opacity-50"
-                    : "cursor-pointer"
-                }`}
-                disabled={item.validada}
-              >
-                Editar
-              </button>
-              <button
-                onClick={() =>
-                  navigate(`/boleta-detail/${item.userId.timestamp}`, {
-                    state: item,
-                  })
-                }
-                className="col-span-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-              >
-                Ver boleta
-              </button>
-            </div>
-          </div>
+        {boletas.map((boleta) => (
+          <BoletaItem
+            key={boleta._id}
+            boleta={boleta}
+            onEditClick={() =>
+              navigate(`/boleta-update/${boleta.userId.timestamp}`, {
+                state: boleta,
+              })
+            }
+            onViewClick={() =>
+              navigate(`/boleta-detail/${boleta.userId.timestamp}`, {
+                state: boleta,
+              })
+            }
+          />
         ))}
       </div>
     </div>

@@ -71,8 +71,6 @@ export const BoletaCreate = () => {
       validada: false,
     };
 
-    console.log("Datos a enviar en la solicitud POST:", newRecord); // Agrega este console.log
-
     try {
       if (subId === "") {
         await ticketsAPI.create(newRecord);
@@ -200,7 +198,7 @@ export const BoletaCreate = () => {
           >
             <div className="flex justify-center items-center">
               <p className="font-bold mr-2">GENERAR BOLETA</p>
-              <ion-icon size="large" name="qr-code-outline"></ion-icon>
+              📱
             </div>
           </button>
         </form>

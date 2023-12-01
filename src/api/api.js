@@ -38,6 +38,16 @@ const ticketsAPI = {
     }
   },
 
+  getTicketById: async (ticketId) => {
+    try {
+      const response = await api.get(`/tickets/ticket/${ticketId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching boleta by id:", error);
+      throw error;
+    }
+  },
+
   create: async (ticketData) => {
     try {
       const response = await api.post("/tickets", ticketData);
@@ -58,15 +68,15 @@ const ticketsAPI = {
     }
   },
 
-  validateBoleta: async (ticketData) => {
+  validateTicketById: async (ticketId) => {
     try {
-      const response = await api.post("/tickets/validate", ticketData);
+      const response = await api.put(`/tickets/${ticketId}`);
       return response.data;
     } catch (error) {
       console.error("Error validating ticket:", error);
       throw error;
     }
-  },
+  }
 };
 
 export { authAPI, ticketsAPI };

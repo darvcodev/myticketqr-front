@@ -10,16 +10,16 @@ import { Loader } from "../../components/Loader";
 
 export const BoletaDetail = () => {
   const [qrCode, setQrCode] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Agregar estado de carga
+  const [isLoading, setIsLoading] = useState(true);
   const { state: item } = useLocation();
   const datos = item;
 
   useEffect(() => {
     if (datos !== null) {
-      QRCode.toDataURL(datos.celular || "") // Usar datos.celular como argumento
+      QRCode.toDataURL(datos._id || "")
         .then((url) => {
-          setQrCode(url); // Guardar el código QR en el estado
-          setIsLoading(false); // Cambiar estado de carga cuando se completa la verificación
+          setQrCode(url);
+          setIsLoading(false);
         })
         .catch((err) => {
           console.error(err);
@@ -39,7 +39,7 @@ export const BoletaDetail = () => {
     htmlToImage.toPng(tempContainer.firstChild).then((dataUrl) => {
       // Crear un enlace temporal para descargar el archivo
       const link = document.createElement("a");
-      link.download = `${datos?.celular || ""}-qr.png`;
+      link.download = `${datos?._id || ""}-qr.png`;
       link.href = dataUrl;
       link.click();
 
@@ -62,7 +62,12 @@ export const BoletaDetail = () => {
                     <img src="/miraista.png" className="w-full mt-16" />
                   </div>
                   <h1 className="text-center font-bold text-3xl text-amber-500 -mt-4 py-2 uppercase">
-                    {datos?.comprador === null ? "" : datos?.comprador.substring(0, datos?.comprador.indexOf(" "))}
+                    {datos?.comprador === null
+                      ? ""
+                      : datos?.comprador.substring(
+                          0,
+                          datos?.comprador.indexOf(" ")
+                        )}
                   </h1>
                   <p className="font-semibold text-white">
                     ¡Compartamos juntos este gran evento!
@@ -75,11 +80,11 @@ export const BoletaDetail = () => {
               </div>
               <div className="flex items-center px-4">
                 <div className="flex items-center w-1/2">
-                  <div className="text-5xl font-black mr-1 text-white">19</div>
+                  <div className="text-5xl font-black mr-1 text-white">20</div>
                   <div>
-                    <div className="font-bold text-lg text-white">Junio</div>
+                    <div className="font-bold text-lg text-white">Marzo</div>
                     <div className="font-bold text-lg text-white -mt-2">
-                      2023
+                      2024
                     </div>
                   </div>
                 </div>
@@ -118,7 +123,7 @@ export const BoletaDetail = () => {
 
   return (
     <div className="p-3 pt-8">
-      {datos?.celular ? (
+      {datos?._id ? (
         <>
           {boletaContainer}
           <button

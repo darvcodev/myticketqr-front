@@ -19,12 +19,23 @@ export const ScannerQR = () => {
         console.log(result["data"]);
 
         try {
-          const validationResponse = await ticketsAPI.validateBoleta(
-            result["data"]
-          );
+          const response = await ticketsAPI.validateTicketById(result["data"]);
 
-          if (validationResponse.success) {
-            // La boleta se validó con éxito
+          if (response.error) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "No se encontró ninguna boleta registrada con este QR.",
+              confirmButtonText: "Aceptar",
+            });
+          } else if (response.validada) {
+            Swal.fire({
+              icon: "info",
+              title: "Atención",
+              text: "Esta boleta ya ha sido validada previamente.",
+              confirmButtonText: "Aceptar",
+            });
+          } else if (response.estado === "Pagada") {
             Swal.fire({
               icon: "success",
               title: "Boleta validada",
@@ -32,23 +43,15 @@ export const ScannerQR = () => {
               confirmButtonText: "Aceptar",
             });
           } else {
-            // Mostrar mensaje de alerta en caso de error o boleta no válida
             Swal.fire({
               icon: "info",
-              title: "Atención",
-              text: validationResponse.message,
+              title: `Boleta: ${response.estado}`,
+              text: `Esta boleta no puede ser validada.`,
               confirmButtonText: "Aceptar",
             });
           }
         } catch (error) {
-          console.error("Error al validar la boleta:", error);
-          // Mostrar mensaje de error en caso de error en la validación
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Hubo un error al validar la boleta.",
-            confirmButtonText: "Aceptar",
-          });
+          console.error(error);
         }
       },
       {
@@ -73,7 +76,14 @@ export const ScannerQR = () => {
       <div className="p-4">
         <video ref={videoRef} className="qr-video" playsInline width="100%" />
       </div>
-
+      {/* BOTÓN QUE REFRESCA LA PANTALLA */}
+      <p className="text-2xl font-bold text-center pb-4">
+        {qrResult ? (
+          <span className="text-red-500">Boltea: {qrResult}</span>
+        ) : (
+          <span className="text-gray-300">Escanee un código QR</span>
+        )}
+      </p>
       <button
         className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
         onClick={() => window.location.reload()}
